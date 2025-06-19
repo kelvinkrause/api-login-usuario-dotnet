@@ -1,5 +1,8 @@
-﻿using LoginUsuario.Application.DTOs;
-using LoginUsuario.Application.Interfaces;
+﻿using LoginUsuario.Application.UseCases.DoLogin;
+using LoginUsuario.Application.UseCases.Register;
+using LoginUsuario.Comunication.Requests;
+using LoginUsuario.Comunication.Responses;
+using LoginUsuario.Exception;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,24 +12,52 @@ namespace LoginUsuario.Api.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-        private readonly IUsuarioService _service;
-        public UsuarioController(IUsuarioService service)
+        private readonly RegisterUsuarioUseCase _registerUsuarioUseCase;
+        private readonly DoLoginUsuarioUseCase _doLoginUsuarioUseCase;
+        public UsuarioController(RegisterUsuarioUseCase registerUsuarioUseCase,
+                                 DoLoginUsuarioUseCase doLoginUsuarioUseCase)
         {
-            _service = service;
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUsuarioRequest request)
-        {
-            await _service.RegistrarAsync(request);
-            return Ok(new { message = "Usuário cadastrado com sucesso." });
+            _registerUsuarioUseCase = registerUsuarioUseCase;
+            _doLoginUsuarioUseCase = doLoginUsuarioUseCase;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginUsuarioRequest request)
+        [ProducesResponseType(typeof(ResponseErrorMessageJson), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseLoginUsuarioJson), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Login([FromBody] RequestLoginUsuarioJson request)
         {
-            var response = await _service.LoginAsync(request);
-            return Ok(response);
+            try
+            {
+                var response = await _doLoginUsuarioUseCase.Execute(request);
+                return Ok(response);
+            }
+            catch (LoginUsuarioException login)
+            {
+                return Unauthorized(new ResponseErrorMessageJson
+                {
+                    Errors = login.GetErrorMessage()
+                });
+            }
+
+        }
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(ResponseRegisteredUseCase), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseErrorMessageJson), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Register([FromBody] RequestRegisterUsuarioJson request)
+        {
+            try
+            {
+                var response = await _registerUsuarioUseCase.Execute(request);
+                return Created(string.Empty, response);
+
+            }
+            catch (LoginUsuarioException register)
+            {
+                return BadRequest(new ResponseErrorMessageJson
+                {
+                    Errors = register.GetErrorMessage()
+                });
+            }
         }
     }
 }

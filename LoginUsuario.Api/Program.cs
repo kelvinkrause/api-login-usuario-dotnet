@@ -1,5 +1,8 @@
-using LoginUsuario.Application.Interfaces;
-using LoginUsuario.Application.Services;
+using FluentValidation;
+using LoginUsuario.Application.UseCases.DoLogin;
+using LoginUsuario.Application.UseCases.Register;
+using LoginUsuario.Application.Validators;
+using LoginUsuario.Comunication.Requests;
 using LoginUsuario.Domain.Interfaces;
 using LoginUsuario.Infrastructure.Data;
 using LoginUsuario.Infrastructure.Repositories;
@@ -11,7 +14,10 @@ builder.Services.AddDbContext<UsuarioDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<LoginUsuario.Application.UseCases.DoLogin.DoLoginUsuarioUseCase>();
+builder.Services.AddScoped<LoginUsuario.Application.UseCases.Register.RegisterUsuarioUseCase>();
+
+builder.Services.AddScoped<IValidator<RequestRegisterUsuarioJson>, RegisterUsuarioValidator>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

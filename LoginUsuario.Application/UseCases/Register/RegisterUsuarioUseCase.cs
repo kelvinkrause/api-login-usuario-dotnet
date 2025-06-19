@@ -3,12 +3,8 @@ using LoginUsuario.Comunication.Requests;
 using LoginUsuario.Comunication.Responses;
 using LoginUsuario.Domain.Entities;
 using LoginUsuario.Domain.Interfaces;
+using LoginUsuario.Domain.Interfaces.Security;
 using LoginUsuario.Exception;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LoginUsuario.Application.UseCases.Register
 {
@@ -16,10 +12,14 @@ namespace LoginUsuario.Application.UseCases.Register
     {
         private readonly IUsuarioRepository _repository;
         private readonly IValidator<RequestRegisterUsuarioJson> _registerValidator;
-        public RegisterUsuarioUseCase(IUsuarioRepository repository, IValidator<RequestRegisterUsuarioJson> registerValidator)
+        private readonly ICryptographyService _algorithm;
+        public RegisterUsuarioUseCase(IUsuarioRepository repository, 
+                                      IValidator<RequestRegisterUsuarioJson> registerValidator,
+                                      ICryptographyService algorithm)
         {
             _repository = repository;
             _registerValidator = registerValidator;
+            _algorithm = algorithm;
         }
         public async Task<ResponseRegisteredUseCase> Execute(RequestRegisterUsuarioJson request)
         {
@@ -42,7 +42,7 @@ namespace LoginUsuario.Application.UseCases.Register
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 Email = request.Email,
-                Password = request.Password,
+                Password = _algorithm.HashPassword(request.Password),
                 CreateAt = DateTime.UtcNow
             };
 

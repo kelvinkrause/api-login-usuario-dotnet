@@ -13,13 +13,17 @@ namespace LoginUsuario.Application.UseCases.Register
         private readonly IUsuarioRepository _repository;
         private readonly IValidator<RequestRegisterUsuarioJson> _registerValidator;
         private readonly ICryptographyService _algorithm;
-        public RegisterUsuarioUseCase(IUsuarioRepository repository, 
-                                      IValidator<RequestRegisterUsuarioJson> registerValidator,
-                                      ICryptographyService algorithm)
+        private readonly ITokenService _tokenService;
+        public RegisterUsuarioUseCase(
+            IUsuarioRepository repository,
+            IValidator<RequestRegisterUsuarioJson> registerValidator,
+            ICryptographyService algorithm,
+            ITokenService tokenService)
         {
             _repository = repository;
             _registerValidator = registerValidator;
             _algorithm = algorithm;
+            _tokenService = tokenService;
         }
         public async Task<ResponseRegisteredUseCase> Execute(RequestRegisterUsuarioJson request)
         {
@@ -51,9 +55,8 @@ namespace LoginUsuario.Application.UseCases.Register
             return new ResponseRegisteredUseCase
             {
                 Nome = usuario.Name,
-                Token = "Aqui algum dia terá um token de acesso."
+                Token = _tokenService.GenerateToken(usuario)
             };
-
         }
     }
 }

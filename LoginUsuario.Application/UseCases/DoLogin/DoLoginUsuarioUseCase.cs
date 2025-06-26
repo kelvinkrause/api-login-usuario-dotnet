@@ -3,6 +3,7 @@ using LoginUsuario.Comunication.Responses;
 using LoginUsuario.Domain.Interfaces;
 using LoginUsuario.Domain.Interfaces.Security;
 using LoginUsuario.Exception;
+using System.Runtime.CompilerServices;
 
 namespace LoginUsuario.Application.UseCases.DoLogin
 {
@@ -10,10 +11,15 @@ namespace LoginUsuario.Application.UseCases.DoLogin
     {
         private readonly IUsuarioRepository _repository;
         private readonly ICryptographyService _algorithm;
-        public DoLoginUsuarioUseCase(IUsuarioRepository repository, ICryptographyService algorithm)
+        private readonly ITokenService _tokenService;
+        public DoLoginUsuarioUseCase(
+            IUsuarioRepository repository, 
+            ICryptographyService algorithm,
+            ITokenService tokenService)
         {
             _repository = repository;
             _algorithm = algorithm;
+            _tokenService = tokenService;
         }
         public async Task<ResponseLoginUsuarioJson> Execute(RequestLoginUsuarioJson request)
         {
@@ -25,7 +31,7 @@ namespace LoginUsuario.Application.UseCases.DoLogin
             return new ResponseLoginUsuarioJson
             {
                 Name = usuario.Name,
-                Token = "Aqui algum dia terá um token de acesso."
+                Token = _tokenService.GenerateToken(usuario)
             };
 
         }

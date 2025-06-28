@@ -556,10 +556,6 @@ A API retorna códigos de status HTTP apropriados:
 - Validação de entrada de dados
 - Tokens JWT com tempo de expiração curto
 
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
 ## 🤝 Contribuição
 
 1. Faça um fork do projeto
